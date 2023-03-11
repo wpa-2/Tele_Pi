@@ -1,0 +1,12 @@
+[Unit]
+Description=My Telegram Bot
+After=multi-user.target
+
+[Service]
+User=<user-to-run-as>
+WorkingDirectory=<path-to-your-script>
+ExecStart=<path-to-python-interpreter> <path-to-your-script>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
