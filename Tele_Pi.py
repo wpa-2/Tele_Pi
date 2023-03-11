@@ -285,7 +285,7 @@ def help(update, context):
 
 def main():
     # Create the Updater and pass it your bot's token.
-    updater = Updater("Bot_ID GOES HERE", use_context=True)
+    updater = Updater("CHANGE THIS TO YOUR BOT_ID", use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
