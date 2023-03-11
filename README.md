@@ -17,4 +17,4 @@ Line 231 with your RAM threshold in %
 
 
 You might need to insatll these. 
-pip3 install re os logging subprocess time requests psutil threading telegram
+pip3 install requests python-telegram-bot psutil
