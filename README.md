@@ -17,4 +17,4 @@ Line 231 with your RAM threshold in %
 
 
 You might need to insatll these. 
-pip3 install requests python-telegram-bot psutil
+pip3 install requests python-telegram-bot==12.8 psutil
