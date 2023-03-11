@@ -16,5 +16,5 @@ Line 154 with your temp threshold in °C
 Line 231 with your RAM threshold in %
 
 
-YOu might need to insatll these. 
+You might need to insatll these. 
 pip3 install re os logging subprocess time requests psutil threading telegram
