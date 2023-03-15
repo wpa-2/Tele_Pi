@@ -25,8 +25,7 @@ system_commands = [
     {"name": "/show_processes", "description": "Show all processes"},
     {"name": "/show_system_services", "description": "Show system services"},
     {"name": "/start_monitoring", "description": "Start CPU temperature monitoring"},
-    {"name": "/stop_monitoring", "description": "Stop CPU temperature monitoring"},
-    {"name": "/show_bluetooth_devices", "description": "Show list of available Bluetooth devices"},
+    {"name": "/stop_monitoring", "description": "Stop CPU temperature monitoring"},    
     {"name": "/start_monitoring_ram", "description": "Start RAM monitoring"},
     {"name": "/stop_monitoring_ram", "description": "Stop RAM monitoring"}
 ]
@@ -35,6 +34,7 @@ network_commands = [
     {"name": "/show_network_info", "description": "Show network information"},
     {"name": "/ip", "description": "Show IP addresses"},
     {"name": "/wifi", "description": "Show list of available wifi access points"},
+    {"name": "/show_bluetooth_devices", "description": "Show list of available Bluetooth devices"},
     {"name": "/external_ip", "description": "Show external IP address"},
     {"name": "/ping", "description": "Pings a remote host /ping IP or hostname"}
 ]
@@ -178,37 +178,68 @@ def stop_monitoring(update, context):
     monitoring = False
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"Stopped monitoring CPU temperature")
 
-
 def show_bluetooth_devices(update, context):
-    # Show list of available Bluetooth devices
-    output = subprocess.check_output(["hcitool", "scan"])
+    # Send "Scanning..." message to indicate that the program is scanning for devices
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Scanning for Bluetooth devices...")
+
+    # Start Bluetooth scan
+    subprocess.Popen(["bluetoothctl", "scan", "on"])
+
+    # Wait for 20 seconds to allow time for the scan to complete
+    time.sleep(20)
+
+    # Show list of available Bluetooth devices with type information
+    output = subprocess.check_output(["bluetoothctl", "devices"])
     output = output.decode("utf-8")
-    devices = []
+    devices_with_type = []
     for line in output.split("\n"):
-        match = re.search(r"\s+([0-9A-F:]{17})\s+(.+)", line)
+        match = re.search(r"Device\s+([0-9A-F:]{17})\s+(.+)", line)
         if match:
-            devices.append(match.group(2))
-    if devices:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(devices))
+            mac_address = match.group(1)
+            device_name = match.group(2)
+            device_type_output = subprocess.check_output(["bluetoothctl", "info", mac_address])
+            device_type_output = device_type_output.decode("utf-8")
+            device_type_match = re.search(r"\s+Class:\s+(\w+)", device_type_output)
+            device_type = device_type_match.group(1) if device_type_match else "Unknown"
+            devices_with_type.append(f"{device_name} ({device_type})")
+    if devices_with_type:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(devices_with_type))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text="No devices found.")
 
 def wifi(update, context):
-    # Show list of available wifi access points
-    output = subprocess.check_output(["sudo", "iwlist", "wlan0", "scan"])
+    # Send "Scanning..." message to indicate that the program is scanning for access points
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Scanning for WiFi access points...")
+
+    # Start the wifi scan
+    subprocess.Popen(["sudo", "iwlist", "wlan1", "scan"])
+
+    # Wait for 20 seconds to allow time for the scan to complete
+    time.sleep(20)
+
+    # Show list of available wifi access points with encryption type
+    output = subprocess.check_output(["sudo", "iwlist", "wlan1", "scan"])
     output = output.decode("utf-8")
     lines = output.split("\n")
-    essids = []
-    for line in lines:
-        if "ESSID" in line:
-            essid = line.split(":")[1].strip().strip('"')
+    essids_with_encryption = []
+    for i in range(len(lines)):
+        if "ESSID" in lines[i]:
+            essid = lines[i].split(":")[1].strip().strip('"')
             if essid:
-                essids.append(essid)
-    if essids:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(essids))
+                encryption = "Not encrypted"
+                for j in range(i, len(lines)):
+                    if "Encryption key:" in lines[j]:
+                        if "on" in lines[j]:
+                            encryption = "WPA/WPA2"
+                        else:
+                            encryption = "WEP"
+                        break
+                essids_with_encryption.append(f"{essid} ({encryption})")
+    if essids_with_encryption:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="\n".join(essids_with_encryption))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text="No ESSIDs found")
-        
+       
 def reboot(update, context):
     # Reboot the system
     context.bot.send_message(chat_id=update.effective_chat.id, text="Rebooting the system, please wait...")
@@ -285,7 +316,7 @@ def help(update, context):
 
 def main():
     # Create the Updater and pass it your bot's token.
-    updater = Updater("CHANGE THIS TO YOUR BOT_ID", use_context=True)
+    updater = Updater("BOT-ID-HERE", use_context=True)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
@@ -361,7 +392,7 @@ def main():
     
     # Add command handler to ping function
     dp.add_handler(CommandHandler("stop_monitoring_ram", stop_monitoring_ram))
-         
+             
     # Start the Bot
     updater.start_polling()
 
