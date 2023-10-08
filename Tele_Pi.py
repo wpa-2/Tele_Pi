@@ -109,7 +109,7 @@ def uptime(update, context):
 def speedtest(update, context):
     # Run speedtest and return the result
     context.bot.send_message(chat_id=update.effective_chat.id, text="Running speedtest...")
-    result = subprocess.run(["speedtest-cli"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(["/usr/local/bin/speedtest-cli", "--secure"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     context.bot.send_message(chat_id=update.effective_chat.id, text=result.stdout.decode())
 
 def disk_usage(update, context):
