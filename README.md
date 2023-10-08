@@ -18,5 +18,5 @@ Line 231 with your RAM threshold in %
 
 You might need to install these. 
 ```
-pip3 install requests python-telegram-bot==12.8 psutil
+pip3 install requests python-telegram-bot==12.8 psutil speedtest-cli  
 ```
