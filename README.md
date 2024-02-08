@@ -1,6 +1,9 @@
 # Tele_Pi
 Basic Telegram bot that talks to your Raspberry_PI
 
+![Screenshot 2024-02-08 070611](https://github.com/wpa-2/Tele_Pi/assets/9049886/b456556a-2093-448a-af4d-ce5be3127681)
+
+
 
 Will edit this later 
 
